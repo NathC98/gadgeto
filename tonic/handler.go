@@ -22,12 +22,12 @@ var (
 // in parameters.
 // The handler may use the following signature:
 //
-//  func(*gin.Context, [input object ptr]) ([output object], error)
+//	func(*gin.Context, [input object ptr]) ([output object], error)
 //
 // Input and output objects are both optional.
 // As such, the minimal accepted signature is:
 //
-//  func(*gin.Context) error
+//	func(*gin.Context) error
 //
 // The wrapping gin-handler will bind the parameters from the query-string,
 // path, body and headers, and handle the errors.
@@ -94,7 +94,8 @@ func Handler(h interface{}, status int, options ...func(*Route)) gin.HandlerFunc
 			// validating query and path inputs if they have a validate tag
 			initValidator()
 			args = append(args, input)
-			if err := validatorObj.Struct(input.Interface()); err != nil {
+
+			if err := validatorObj.Struct(in); err != nil {
 				handleError(c, BindError{message: err.Error(), validationErr: err})
 				return
 			}
@@ -156,6 +157,7 @@ func RegisterValidation(tagName string, validationFunc validator.Func) error {
 // NOTE: this method is not thread-safe it is intended that these all be registered prior to any validation
 func RegisterCustomTypeFunc(validationFunc validator.CustomTypeFunc, types ...interface{}) {
 	initValidator()
+	fmt.Printf("!!!!!!!!!!!!!!!!!! I ATTRIBUTE A NEW VALIDATOR \n")
 	validatorObj.RegisterCustomTypeFunc(validationFunc, types)
 }
 
@@ -163,13 +165,13 @@ func RegisterCustomTypeFunc(validationFunc validator.CustomTypeFunc, types ...in
 //
 // eg. to use the names which have been specified for JSON representations of structs, rather than normal Go field names:
 //
-//    tonic.RegisterTagNameFunc(func(fld reflect.StructField) string {
-//        name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
-//        if name == "-" {
-//            return ""
-//        }
-//        return name
-//    })
+//	tonic.RegisterTagNameFunc(func(fld reflect.StructField) string {
+//	    name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+//	    if name == "-" {
+//	        return ""
+//	    }
+//	    return name
+//	})
 func RegisterTagNameFunc(registerTagFunc validator.TagNameFunc) {
 	initValidator()
 	validatorObj.RegisterTagNameFunc(registerTagFunc)
